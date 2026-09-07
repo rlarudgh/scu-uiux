@@ -8,7 +8,85 @@
     <title>ui&ux programming</title>
   </head>
   <body>
-    <h1>Hello UI/UX Programming!</h1>
-    <span>작성자: 김경호</span>
+    <!--
+      사용자: 책을 읽고 기록을 남기고 싶은 20~30대 독서 초보자
+      목적: 매일의 독서 기록을 간단히 남기고 습관을 이어가도록 돕는다
+      핵심 행동: 이메일을 남기고 서비스 알림(사전 알림)을 신청한다
+      정보 순서: 서비스명/한줄소개 -> 서비스 소개 -> 주요 기능 -> 이용 방법 -> 신청(입력) -> 푸터
+    -->
+
+    <header>
+      <h1>책갈피</h1>
+      <p>하루 한 줄, 나만의 독서 기록장</p>
+      <nav>
+        <a href="#intro">소개</a>
+        <a href="#features">주요 기능</a>
+        <a href="#howto">이용 방법</a>
+        <a href="#start">시작하기</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="intro">
+        <h2>서비스 소개</h2>
+        <p>
+          책갈피는 읽은 책과 그날의 생각을 짧게 기록할 수 있는 독서 기록
+          서비스입니다. 복잡한 기능 없이 오늘 읽은 페이지와 한 줄 감상만 남겨도
+          나만의 독서 히스토리가 쌓입니다.
+        </p>
+        <img
+          src="./images/book.webp"
+          loading="lazy"
+          alt="책 두 권과 별 모양 아이콘으로 표현한 책갈피 서비스 대표 이미지"
+        />
+      </section>
+
+      <section id="features">
+        <h2>주요 기능</h2>
+        <ul>
+          <li>
+            <h3>한 줄 기록</h3>
+            <p>오늘 읽은 책과 짧은 감상을 1분 안에 남길 수 있어요.</p>
+          </li>
+          <li>
+            <h3>독서 캘린더</h3>
+            <p>날짜별로 기록을 모아보며 독서 습관을 확인할 수 있어요.</p>
+          </li>
+          <li>
+            <h3>완독 목록</h3>
+            <p>다 읽은 책을 한눈에 모아보는 나만의 서재를 만들 수 있어요.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section id="howto">
+        <h2>이용 방법</h2>
+        <ol>
+          <li>지금 읽고 있는 책을 등록합니다.</li>
+          <li>오늘 읽은 부분과 한 줄 감상을 기록합니다.</li>
+          <li>캘린더에서 쌓여가는 독서 기록을 확인합니다.</li>
+        </ol>
+      </section>
+
+      <section id="start">
+        <h2>시작하기</h2>
+        <p>이메일을 남기면 서비스 오픈 소식을 가장 먼저 알려드려요.</p>
+        <form>
+          <label for="email">이메일</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            required
+          />
+          <button type="submit">알림 신청</button>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <span>작성자: 김경호</span>
+    </footer>
   </body>
 </html>
