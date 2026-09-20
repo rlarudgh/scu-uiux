@@ -28,8 +28,14 @@ header p {
   margin: 0 0 16px;
 }
 
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
 nav a {
-  margin: 0 8px;
   padding: 6px 14px;
   border-radius: 16px;
   color: #2f6b52;
@@ -69,7 +75,9 @@ section p {
 }
 
 img {
+  width: 100%;
   max-width: 100%;
+  height: auto;
   border-radius: 6px;
 }
 
@@ -81,6 +89,9 @@ ol {
 #features ul {
   list-style: none;
   padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
 #features li {
@@ -88,24 +99,25 @@ ol {
   border: 1px solid #d7e3dc;
   border-radius: 6px;
   padding: 16px;
-  margin-bottom: 12px;
-}
-
-#features li:last-child {
-  margin-bottom: 0;
 }
 
 #start label {
-  display: block;
-  margin-bottom: 8px;
+  flex-basis: 100%;
   font-size: 0.95rem;
   color: #444;
 }
 
+#start form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
 #start input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 10px 12px;
-  margin-bottom: 12px;
   border: 1px solid #d7e3dc;
   border-radius: 6px;
   font-size: 1rem;
@@ -113,6 +125,7 @@ ol {
 }
 
 #start button {
+  flex-shrink: 0;
   padding: 10px 20px;
   background-color: #2f6b52;
   color: #ffffff;
@@ -133,4 +146,45 @@ footer {
   margin-top: 40px;
   padding-top: 16px;
   border-top: 1px solid #d7e3dc;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 16px;
+  }
+
+  header {
+    padding: 20px 12px;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  section {
+    padding: 16px;
+  }
+
+  section h2 {
+    font-size: 1.2rem;
+  }
+
+  #features ul {
+    grid-template-columns: 1fr;
+  }
+
+  #start form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #start input,
+  #start button {
+    width: 100%;
+  }
 }
