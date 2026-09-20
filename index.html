@@ -71,7 +71,7 @@
       <section id="start">
         <h2>시작하기</h2>
         <p>이메일을 남기면 서비스 오픈 소식을 가장 먼저 알려드려요.</p>
-        <form>
+        <form novalidate>
           <label for="email">이메일</label>
           <input
             type="email"
@@ -82,6 +82,7 @@
           />
           <button type="submit">알림 신청</button>
         </form>
+        <p id="email-feedback" class="form-feedback" aria-live="polite"></p>
       </section>
     </main>
 

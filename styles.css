@@ -140,6 +140,33 @@ ol {
   background-color: #245640;
 }
 
+#start button:disabled {
+  background-color: #a9b8b1;
+  cursor: not-allowed;
+}
+
+.form-feedback {
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+}
+
+.form-feedback:empty {
+  display: none;
+}
+
+.form-feedback.error {
+  color: #b3261e;
+}
+
+.form-feedback.warning {
+  color: #a15c00;
+}
+
+.form-feedback.success {
+  color: #2f6b52;
+  font-weight: bold;
+}
+
 footer {
   text-align: center;
   color: #666;
