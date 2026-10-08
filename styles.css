@@ -86,19 +86,208 @@ ol {
   padding-left: 20px;
 }
 
-#features ul {
+.tab-list {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid #d7e3dc;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 8px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  border-radius: 6px 6px 0 0;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tab:hover {
+  background-color: #eef5f1;
+}
+
+.tab.is-active {
+  color: #2f6b52;
+  font-weight: bold;
+  background-color: #eef5f1;
+  border-bottom-color: #2f6b52;
+}
+
+.tab:focus-visible {
+  outline: 2px solid #2f6b52;
+  outline-offset: -2px;
+}
+
+.record-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-form label {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.record-form input,
+.record-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.record-form input.is-invalid {
+  border-color: #b3261e;
+  background-color: #fdf3f2;
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.status-row select {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.status-badge[data-status="reading"] {
+  background-color: #e3eefb;
+  color: #1f4e8c;
+}
+
+.status-badge[data-status="finished"] {
+  background-color: #d7e8de;
+  color: #245640;
+  font-weight: bold;
+}
+
+.status-badge[data-status="paused"] {
+  background-color: #f6ead6;
+  color: #8a5300;
+}
+
+section p.counter {
+  margin: 0;
+  text-align: right;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+section p.counter.warn {
+  color: #a15c00;
+}
+
+section p.counter.over {
+  color: #b3261e;
+  font-weight: bold;
+}
+
+#record-button {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background-color: #2f6b52;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#record-button:hover {
+  background-color: #245640;
+}
+
+#record-button:disabled {
+  background-color: #a9b8b1;
+  cursor: not-allowed;
+}
+
+section p.empty-message {
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.record-list {
   list-style: none;
   padding-left: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
-#features li {
+.record-list li {
   background-color: #f7faf8;
   border: 1px solid #d7e3dc;
   border-radius: 6px;
-  padding: 16px;
+  padding: 12px 16px;
+}
+
+.record-list strong {
+  margin-right: 8px;
+  color: #245640;
+}
+
+.record-list p {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.calendar {
+  list-style: none;
+  padding-left: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #666;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day strong {
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.calendar-day.is-today {
+  border: 2px solid #2f6b52;
+}
+
+.calendar-day.is-recorded {
+  background-color: #2f6b52;
+  color: #d7e8de;
+}
+
+.calendar-day.is-recorded strong {
+  color: #ffffff;
 }
 
 #start label {
@@ -201,8 +390,8 @@ footer {
     font-size: 1.2rem;
   }
 
-  #features ul {
-    grid-template-columns: 1fr;
+  #record-button {
+    align-self: stretch;
   }
 
   #start form {
@@ -213,5 +402,25 @@ footer {
   #start input,
   #start button {
     width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .tab {
+    padding: 8px 4px;
+    font-size: 0.9rem;
+  }
+
+  .calendar {
+    gap: 4px;
+  }
+
+  .calendar-day {
+    padding: 6px 0;
+    font-size: 0.75rem;
+  }
+
+  .calendar-day strong {
+    font-size: 0.95rem;
   }
 }

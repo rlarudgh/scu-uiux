@@ -43,20 +43,108 @@
 
       <section id="features">
         <h2>주요 기능</h2>
-        <ul>
-          <li>
-            <h3>한 줄 기록</h3>
-            <p>오늘 읽은 책과 짧은 감상을 1분 안에 남길 수 있어요.</p>
-          </li>
-          <li>
-            <h3>독서 캘린더</h3>
-            <p>날짜별로 기록을 모아보며 독서 습관을 확인할 수 있어요.</p>
-          </li>
-          <li>
-            <h3>완독 목록</h3>
-            <p>다 읽은 책을 한눈에 모아보는 나만의 서재를 만들 수 있어요.</p>
-          </li>
-        </ul>
+        <div class="tab-list" role="tablist" aria-label="책갈피 주요 기능">
+          <button
+            type="button"
+            class="tab is-active"
+            id="tab-record"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-record"
+          >
+            한 줄 기록
+          </button>
+          <button
+            type="button"
+            class="tab"
+            id="tab-calendar"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-calendar"
+            tabindex="-1"
+          >
+            독서 캘린더
+          </button>
+          <button
+            type="button"
+            class="tab"
+            id="tab-finished"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-finished"
+            tabindex="-1"
+          >
+            완독 목록
+          </button>
+        </div>
+
+        <div
+          class="tab-panel"
+          id="panel-record"
+          role="tabpanel"
+          aria-labelledby="tab-record"
+        >
+          <p>오늘 읽은 책과 짧은 감상을 1분 안에 남겨보세요.</p>
+          <form id="record-form" class="record-form" novalidate>
+            <label for="book-title">책 제목</label>
+            <input
+              type="text"
+              id="book-title"
+              placeholder="예: 데미안"
+              maxlength="30"
+            />
+
+            <label for="read-status">읽기 상태</label>
+            <div class="status-row">
+              <select id="read-status">
+                <option value="reading">읽는 중</option>
+                <option value="finished">완독</option>
+                <option value="paused">잠시 멈춤</option>
+              </select>
+              <span id="status-badge" class="status-badge" data-status="reading">
+                열심히 읽는 중이에요
+              </span>
+            </div>
+
+            <label for="memo">한 줄 감상</label>
+            <input
+              type="text"
+              id="memo"
+              placeholder="오늘 읽은 부분에서 기억에 남는 한 줄"
+            />
+            <p id="memo-counter" class="counter" aria-live="polite">0 / 50</p>
+
+            <button type="submit" id="record-button" disabled>기록하기</button>
+          </form>
+          <p id="record-empty" class="empty-message">
+            아직 남긴 기록이 없어요. 첫 기록을 남겨보세요!
+          </p>
+          <ul id="record-list" class="record-list"></ul>
+        </div>
+
+        <div
+          class="tab-panel"
+          id="panel-calendar"
+          role="tabpanel"
+          aria-labelledby="tab-calendar"
+          hidden
+        >
+          <p id="calendar-summary">이번 주 0일 기록했어요.</p>
+          <ol id="calendar" class="calendar"></ol>
+        </div>
+
+        <div
+          class="tab-panel"
+          id="panel-finished"
+          role="tabpanel"
+          aria-labelledby="tab-finished"
+          hidden
+        >
+          <p id="finished-empty" class="empty-message">
+            아직 완독한 책이 없어요. 읽기 상태를 '완독'으로 기록해보세요.
+          </p>
+          <ul id="finished-list" class="record-list"></ul>
+        </div>
       </section>
 
       <section id="howto">
