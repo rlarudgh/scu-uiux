@@ -203,6 +203,7 @@ section p.counter.over {
 }
 
 #record-button {
+  box-sizing: border-box;
   align-self: flex-start;
   padding: 10px 20px;
   background-color: #2f6b52;
@@ -290,6 +291,267 @@ section p.empty-message {
   color: #ffffff;
 }
 
+#goal.is-completed {
+  border-color: #2f6b52;
+  box-shadow: 0 0 0 2px #d7e8de;
+}
+
+.stepper {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 8px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.stepper li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.stepper span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #d7e3dc;
+  border-radius: 50%;
+  background-color: #ffffff;
+  font-weight: bold;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.stepper em {
+  font-style: normal;
+  text-align: center;
+}
+
+.stepper li.is-done {
+  color: #2f6b52;
+}
+
+.stepper li.is-done span {
+  border-color: #2f6b52;
+  background-color: #d7e8de;
+}
+
+.stepper li[aria-current="step"] {
+  color: #2f6b52;
+  font-weight: bold;
+}
+
+.stepper li[aria-current="step"] span {
+  border-color: #2f6b52;
+  background-color: #2f6b52;
+  color: #ffffff;
+}
+
+section p.goal-status {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.goal-step h3:focus {
+  outline: none;
+}
+
+.goal-step .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.goal-step label,
+.goal-step legend {
+  font-size: 0.95rem;
+  color: #444;
+  padding: 0;
+}
+
+.goal-step label strong,
+.goal-step legend strong {
+  color: #b3261e;
+  font-weight: normal;
+  font-size: 0.85rem;
+}
+
+.goal-step input[type="text"],
+.goal-step select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.goal-step .is-invalid {
+  border-color: #b3261e;
+  background-color: #fdf3f2;
+}
+
+fieldset.field.is-invalid {
+  padding: 8px;
+  border: 1px solid #b3261e;
+  border-radius: 6px;
+}
+
+.choice-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.choice {
+  position: relative;
+}
+
+.choice input {
+  position: absolute;
+  opacity: 0;
+}
+
+.choice span {
+  display: block;
+  padding: 10px 4px;
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+  background-color: #ffffff;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.choice input:checked + span {
+  border-color: #2f6b52;
+  background-color: #2f6b52;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.choice input:focus-visible + span {
+  outline: 2px solid #2f6b52;
+  outline-offset: 2px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+section p.field-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #b3261e;
+}
+
+section p.field-error:empty {
+  display: none;
+}
+
+.goal-summary {
+  margin: 0 0 16px;
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+}
+
+.goal-summary div {
+  display: grid;
+  grid-template-columns: 6rem 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.goal-summary div + div {
+  border-top: 1px solid #d7e3dc;
+}
+
+.goal-summary dt {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.goal-summary dd {
+  margin: 0;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.complete-badge {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background-color: #2f6b52;
+}
+
+section p.complete-badge {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary {
+  box-sizing: border-box;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #2f6b52;
+  color: #ffffff;
+  border: 1px solid #2f6b52;
+}
+
+.btn-primary:hover {
+  background-color: #245640;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #2f6b52;
+  border: 1px solid #2f6b52;
+}
+
+.btn-secondary:hover {
+  background-color: #eef5f1;
+}
+
+.btn-link {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: #2f6b52;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 #start label {
   flex-basis: 100%;
   font-size: 0.95rem;
@@ -314,6 +576,7 @@ section p.empty-message {
 }
 
 #start button {
+  box-sizing: border-box;
   flex-shrink: 0;
   padding: 10px 20px;
   background-color: #2f6b52;
@@ -394,6 +657,14 @@ footer {
     align-self: stretch;
   }
 
+  .step-actions {
+    flex-direction: column-reverse;
+  }
+
+  .step-actions button {
+    width: 100%;
+  }
+
   #start form {
     flex-direction: column;
     align-items: stretch;
@@ -406,6 +677,14 @@ footer {
 }
 
 @media (max-width: 390px) {
+  .stepper em {
+    display: none;
+  }
+
+  .goal-summary div {
+    grid-template-columns: 4.5rem 1fr auto;
+  }
+
   .tab {
     padding: 8px 4px;
     font-size: 0.9rem;
