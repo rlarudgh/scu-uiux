@@ -59,3 +59,15 @@
 
 - 768px 이하에서는 버튼이 가로로 꽉 차게 바뀝니다. `box-sizing: border-box`를 넣어서 버튼이 폼 밖으로 나가지 않게 수정했습니다.
 - 390px에서는 진행 단계 이름을 숨기고 숫자만 보이게 했습니다.
+
+## 파일 구조
+
+```
+index.html
+styles.css
+scripts/
+  email.js    이메일 알림 신청
+  tabs.js     주요 기능 탭
+  record.js   한 줄 기록, 독서 캘린더, 완독 목록
+  goal.js     독서 목표 만들기
+```
