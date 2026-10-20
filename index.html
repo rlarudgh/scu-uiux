@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles.css" />
-    <script src="./scripts/email.js" defer></script>
-    <script src="./scripts/tabs.js" defer></script>
-    <script src="./scripts/record.js" defer></script>
-    <script src="./scripts/goal.js" defer></script>
+    <script src="./script.js" defer></script>
     <title>ui&ux programming</title>
   </head>
   <body>
@@ -189,6 +186,43 @@
 
           <div class="goal-step" data-step="2" hidden>
             <h3 tabindex="-1">어떤 책을 읽을까요?</h3>
+            <div class="book-search" role="search">
+              <label for="book-search-input">
+                책 검색 (선택) · 제목이나 저자 이름으로 찾아보세요
+              </label>
+              <div class="search-row">
+                <input
+                  type="search"
+                  id="book-search-input"
+                  maxlength="20"
+                  placeholder="예: 아몬드, 헤세"
+                  aria-describedby="book-search-error"
+                />
+                <button type="button" class="btn-primary" data-search-action="search">
+                  검색
+                </button>
+                <button type="button" class="btn-secondary" data-search-action="clear">
+                  검색 지우기
+                </button>
+              </div>
+              <p id="book-search-error" class="field-error"></p>
+              <p id="book-search-status" class="search-status" aria-live="polite"></p>
+              <ul id="book-search-results" class="book-results"></ul>
+              <div id="book-search-empty" class="search-empty" hidden>
+                <button type="button" class="btn-secondary" data-search-action="retry">
+                  다른 검색어로 찾기
+                </button>
+                <button type="button" class="btn-primary" data-search-action="manual">
+                  직접 입력하기
+                </button>
+              </div>
+              <div id="book-selected" class="book-selected" hidden>
+                <p>선택한 책: <strong id="book-selected-text"></strong></p>
+                <button type="button" class="btn-link" data-search-action="unselect">
+                  선택 취소
+                </button>
+              </div>
+            </div>
             <div class="field">
               <label for="goal-title">책 제목 <strong>(필수)</strong></label>
               <input
@@ -316,6 +350,7 @@
               <span data-summary="amount"></span>씩 읽어봐요.
               <span data-summary="notifyMessage"></span>
             </p>
+            <p class="finish-message" data-summary="finishMessage"></p>
             <div class="step-actions">
               <button type="button" class="btn-secondary" data-action="restart">
                 다시 시작
