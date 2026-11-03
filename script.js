@@ -75,7 +75,8 @@ function handleTabKeydown(e) {
 
   const list = Array.from(tabs);
   const step = e.key === "ArrowRight" ? 1 : -1;
-  const next = list[(list.indexOf(e.currentTarget) + step + list.length) % list.length];
+  const next =
+    list[(list.indexOf(e.currentTarget) + step + list.length) % list.length];
   activateTab(next);
   next.focus();
 }
@@ -90,9 +91,21 @@ const MEMO_MAX = 50;
 const MEMO_WARN = 40;
 
 const STATUS_INFO = {
-  reading: { label: "읽는 중", badge: "열심히 읽는 중이에요", button: "기록하기" },
-  finished: { label: "완독", badge: "완독했어요! 축하해요", button: "완독 기록하기" },
-  paused: { label: "잠시 멈춤", badge: "잠시 쉬어가도 괜찮아요", button: "멈춤 기록하기" },
+  reading: {
+    label: "읽는 중",
+    badge: "열심히 읽는 중이에요",
+    button: "기록하기",
+  },
+  finished: {
+    label: "완독",
+    badge: "완독했어요! 축하해요",
+    button: "완독 기록하기",
+  },
+  paused: {
+    label: "잠시 멈춤",
+    badge: "잠시 쉬어가도 괜찮아요",
+    button: "멈춤 기록하기",
+  },
 };
 
 const recordForm = document.querySelector("#record-form");
@@ -104,12 +117,16 @@ const memoCounter = document.querySelector("#memo-counter");
 const recordButton = document.querySelector("#record-button");
 const recordList = document.querySelector("#record-list");
 const recordEmpty = document.querySelector("#record-empty");
+const recordCount = document.querySelector("#record-count");
+const recordShowAll = document.querySelector("#record-show-all");
+const filterButtons = document.querySelectorAll(".filter-group [data-filter]");
 const calendarEl = document.querySelector("#calendar");
 const calendarSummary = document.querySelector("#calendar-summary");
 const finishedList = document.querySelector("#finished-list");
 const finishedEmpty = document.querySelector("#finished-empty");
 
 const records = [];
+let recordFilter = "all";
 
 function updateRecordButton() {
   const memoLength = memoInput.value.trim().length;
@@ -123,7 +140,10 @@ function updateCounter() {
     length > MEMO_MAX
       ? `${length} / ${MEMO_MAX} · ${length - MEMO_MAX}자를 줄여주세요`
       : `${length} / ${MEMO_MAX}`;
-  memoCounter.classList.toggle("warn", length >= MEMO_WARN && length <= MEMO_MAX);
+  memoCounter.classList.toggle(
+    "warn",
+    length >= MEMO_WARN && length <= MEMO_MAX,
+  );
   memoCounter.classList.toggle("over", length > MEMO_MAX);
   memoInput.classList.toggle("is-invalid", length > MEMO_MAX);
   updateRecordButton();
@@ -152,10 +172,50 @@ function createRecordItem(record) {
   return item;
 }
 
+// 필터 버튼 선택 표시와 목록·개수·빈 상태 안내를 함께 갱신
 function renderRecords() {
-  recordList.replaceChildren(...records.map(createRecordItem));
-  recordEmpty.hidden = records.length > 0;
+  const visible =
+    recordFilter === "all"
+      ? records
+      : records.filter((record) => record.status === recordFilter);
+  const filterLabel = STATUS_INFO[recordFilter]?.label;
+
+  filterButtons.forEach((button) => {
+    const isSelected = button.dataset.filter === recordFilter;
+    button.classList.toggle("is-active", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
+
+  recordList.replaceChildren(...visible.map(createRecordItem));
+
+  recordCount.textContent =
+    records.length === 0
+      ? ""
+      : recordFilter === "all"
+        ? `기록 ${records.length}개를 모두 보고 있어요.`
+        : `전체 기록 ${records.length}개 중 '${filterLabel}' ${visible.length}개를 보고 있어요.`;
+
+  // 기록 자체가 없는 경우와 선택한 조건에 맞는 기록만 없는 경우를 구분
+  const isFilteredEmpty = records.length > 0 && visible.length === 0;
+  recordEmpty.hidden = visible.length > 0;
+  recordEmpty.textContent = isFilteredEmpty
+    ? `'${filterLabel}' 상태의 기록이 없어요. 다른 상태를 고르거나 전체 보기를 눌러보세요.`
+    : "아직 남긴 기록이 없어요. 첫 기록을 남겨보세요!";
+  recordShowAll.hidden = !isFilteredEmpty;
 }
+
+function setRecordFilter(filter) {
+  recordFilter = filter;
+  renderRecords();
+}
+
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => setRecordFilter(button.dataset.filter));
+});
+recordShowAll.addEventListener("click", () => {
+  setRecordFilter("all");
+  filterButtons[0].focus();
+});
 
 function renderFinished() {
   const finished = records.filter((record) => record.status === "finished");
@@ -191,7 +251,9 @@ function renderCalendar() {
   });
 
   calendarEl.replaceChildren(...days);
-  const weekCount = days.filter((day) => day.classList.contains("is-recorded")).length;
+  const weekCount = days.filter((day) =>
+    day.classList.contains("is-recorded"),
+  ).length;
   calendarSummary.textContent =
     weekCount > 0
       ? `이번 주 ${weekCount}일 기록했어요. 좋은 습관이에요!`
@@ -353,6 +415,7 @@ function selectBook(id) {
   searchState.selected = book;
   searchTitleInput.value = book.title;
   searchAuthorInput.value = book.author;
+  updateTitleCounter();
   if (searchTitleInput.classList.contains("is-invalid")) validateTitle();
   bookSearchStatus.classList.remove("is-empty");
   bookSearchStatus.textContent = `『${book.title}』을(를) 골랐어요. '다음'을 눌러 목표를 정해주세요.`;
@@ -363,6 +426,7 @@ function unselectBook() {
   searchState.selected = null;
   searchTitleInput.value = "";
   searchAuthorInput.value = "";
+  updateTitleCounter();
   bookSearchStatus.classList.remove("is-empty");
   bookSearchStatus.textContent =
     "선택을 취소했어요. 다시 고르거나 책 제목을 직접 입력해주세요.";
@@ -443,8 +507,16 @@ searchTitleInput.addEventListener("input", handleTitleEdit);
 const GOAL_LAST_STEP = 5;
 const STEP_NAMES = ["시작", "책 입력", "목표 선택", "확인", "완료"];
 const CYCLE_LABELS = { daily: "매일", three: "주 3회", weekend: "주말만" };
-const AMOUNT_LABELS = { "10p": "10쪽", "20p": "20쪽", "30m": "30분", "60m": "1시간" };
+const AMOUNT_LABELS = {
+  "10p": "10쪽",
+  "20p": "20쪽",
+  "30m": "30분",
+  "60m": "1시간",
+};
+const NOTIFY_METHOD_LABELS = { push: "앱 푸시", email: "이메일" };
 const TITLE_MAX = 30;
+const GOALS_STORAGE_KEY = "bookmark-goals";
+const SUBMIT_DELAY = 800;
 
 const goalSection = document.querySelector("#goal");
 const goalForm = document.querySelector("#goal-form");
@@ -455,13 +527,26 @@ const goalTitle = document.querySelector("#goal-title");
 const goalAuthor = document.querySelector("#goal-author");
 const goalAmount = document.querySelector("#goal-amount");
 const goalNotify = document.querySelector("#goal-notify");
+const notifyOptions = document.querySelector("#notify-options");
+const goalNotifyTime = document.querySelector("#goal-notify-time");
+const titleCounter = document.querySelector("#goal-title-counter");
+const goalSubmit = document.querySelector("#goal-submit");
+const goalSubmitFeedback = document.querySelector("#goal-submit-feedback");
 const cycleFieldset = goalForm.querySelector("fieldset");
 
-function createGoalState() {
-  return { step: 1, title: "", author: "", cycle: "", amount: "", notify: false, pages: 0, completed: false };
-}
-
-let goalState = createGoalState();
+let goalState = {
+  step: 1,
+  title: "",
+  author: "",
+  cycle: "",
+  amount: "",
+  notify: false,
+  notifyTime: "",
+  notifyMethod: "",
+  pages: 0,
+  completed: false,
+  submitting: false,
+};
 
 function showStep(step) {
   goalState.step = step;
@@ -486,10 +571,13 @@ function showStep(step) {
     : `${step} / ${GOAL_LAST_STEP} 단계 · ${STEP_NAMES[step - 1]}`;
 
   if (step === 4 || step === 5) renderSummary();
+  if (step !== 4) resetSubmitState();
 }
 
 function focusStepHeading() {
-  goalForm.querySelector(`.goal-step[data-step="${goalState.step}"] h3`).focus();
+  goalForm
+    .querySelector(`.goal-step[data-step="${goalState.step}"] h3`)
+    .focus();
 }
 
 function setFieldError(field, errorEl, message) {
@@ -515,26 +603,59 @@ function validateTitle() {
       : length > TITLE_MAX
         ? `책 제목은 ${TITLE_MAX}자 이내로 줄여주세요.`
         : "";
-  setFieldError(goalTitle, document.querySelector("#goal-title-error"), message);
+  setFieldError(
+    goalTitle,
+    document.querySelector("#goal-title-error"),
+    message,
+  );
   return message === "" ? null : goalTitle;
 }
 
 function validateCycle() {
-  const message = getSelectedCycle() === "" ? "독서 주기를 하나 선택해주세요." : "";
-  setFieldError(cycleFieldset, document.querySelector("#goal-cycle-error"), message);
+  const message =
+    getSelectedCycle() === "" ? "독서 주기를 하나 선택해주세요." : "";
+  setFieldError(
+    cycleFieldset,
+    document.querySelector("#goal-cycle-error"),
+    message,
+  );
   return message === "" ? null : cycleFieldset.querySelector("input");
 }
 
+// 알림을 받을 때만 시간이 필수
+function validateNotifyTime() {
+  const message =
+    goalNotify.checked && goalNotifyTime.value === ""
+      ? "알림 시간을 선택해주세요. 예: 오후 9:00"
+      : "";
+  setFieldError(
+    goalNotifyTime,
+    document.querySelector("#goal-notify-time-error"),
+    message,
+  );
+  return message === "" ? null : goalNotifyTime;
+}
+
 function validateAmount() {
-  const message = goalAmount.value === "" ? "하루 목표 분량을 목록에서 골라주세요." : "";
-  setFieldError(goalAmount, document.querySelector("#goal-amount-error"), message);
+  const message =
+    goalAmount.value === "" ? "하루 목표 분량을 목록에서 골라주세요." : "";
+  setFieldError(
+    goalAmount,
+    document.querySelector("#goal-amount-error"),
+    message,
+  );
   return message === "" ? null : goalAmount;
 }
 
 // 단계별 검증. 통과하면 true, 실패하면 첫 번째 오류 필드로 이동
 function validateStep(step) {
-  const validators = { 2: [validateTitle], 3: [validateCycle, validateAmount] };
-  const invalidFields = (validators[step] || []).map((validate) => validate()).filter(Boolean);
+  const validators = {
+    2: [validateTitle],
+    3: [validateCycle, validateAmount, validateNotifyTime],
+  };
+  const invalidFields = (validators[step] || [])
+    .map((validate) => validate())
+    .filter(Boolean);
 
   if (invalidFields.length > 0) {
     goalStatus.textContent = `필수 항목 ${invalidFields.length}개를 확인해주세요.`;
@@ -554,7 +675,35 @@ function saveStep(step) {
     goalState.cycle = getSelectedCycle();
     goalState.amount = goalAmount.value;
     goalState.notify = goalNotify.checked;
+    goalState.notifyTime = goalNotify.checked ? goalNotifyTime.value : "";
+    goalState.notifyMethod = goalNotify.checked
+      ? goalForm.querySelector("input[name='notifyMethod']:checked").value
+      : "";
   }
+}
+
+// 입력하는 동안 글자 수와 조건 충족 여부를 문구로 표시
+function updateTitleCounter() {
+  const length = goalTitle.value.trim().length;
+  const status =
+    length === 0
+      ? "책 제목을 입력해주세요"
+      : length > TITLE_MAX
+        ? `${length - TITLE_MAX}자를 줄여주세요`
+        : "✓ 조건 충족";
+  titleCounter.textContent = `${length} / ${TITLE_MAX}자 · ${status}`;
+  titleCounter.classList.toggle("ok", length > 0 && length <= TITLE_MAX);
+  titleCounter.classList.toggle("over", length > TITLE_MAX);
+}
+
+// 알림 영역을 숨기면 안쪽 입력도 비활성화해 검증·제출 대상에서 빠지도록 함
+function toggleNotifyOptions() {
+  const isOn = goalNotify.checked;
+  notifyOptions.hidden = !isOn;
+  notifyOptions.querySelectorAll("input").forEach((input) => {
+    input.disabled = !isOn;
+  });
+  if (!isOn) validateNotifyTime();
 }
 
 function renderSummary() {
@@ -571,8 +720,12 @@ function renderSummary() {
     title: `『${title}』`,
     cycle: CYCLE_LABELS[goalState.cycle],
     amount: AMOUNT_LABELS[goalState.amount],
-    notify: goalState.notify ? "받기" : "받지 않기",
-    notifyMessage: goalState.notify ? "읽을 시간이 되면 알림으로 알려드릴게요." : "",
+    notify: goalState.notify
+      ? `받기 · ${goalState.notifyTime} · ${NOTIFY_METHOD_LABELS[goalState.notifyMethod]}`
+      : "받지 않기",
+    notifyMessage: goalState.notify
+      ? `읽는 날 ${goalState.notifyTime}에 ${NOTIFY_METHOD_LABELS[goalState.notifyMethod]} 알림을 보내드릴게요.`
+      : "",
     finishMessage,
   };
 
@@ -598,8 +751,66 @@ function goPrev() {
   goToStep(goalState.step - 1);
 }
 
-function completeGoal(e) {
+function showSubmitFeedback(message, status) {
+  goalSubmitFeedback.textContent = message;
+  goalSubmitFeedback.className = `form-feedback ${status}`;
+}
+
+function setSubmitting(isSubmitting) {
+  goalState.submitting = isSubmitting;
+  goalSubmit.disabled = isSubmitting;
+  goalSubmit.textContent = isSubmitting ? "등록 중…" : "목표 등록";
+  if (isSubmitting) showSubmitFeedback("목표를 저장하고 있어요…", "pending");
+}
+
+function resetSubmitState() {
+  setSubmitting(false);
+  showSubmitFeedback("", "");
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function readSavedGoals() {
+  try {
+    return JSON.parse(localStorage.getItem(GOALS_STORAGE_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+// 실패 조건: 같은 제목의 목표가 이미 저장됨(duplicate) 또는 localStorage 쓰기 오류(storage)
+function saveGoal(goal) {
+  const goals = readSavedGoals();
+  if (goals.some((saved) => saved.title === goal.title)) {
+    throw new Error("duplicate");
+  }
+
+  const { step, completed, submitting, ...data } = goal;
+  try {
+    localStorage.setItem(
+      GOALS_STORAGE_KEY,
+      JSON.stringify([
+        ...goals,
+        { ...data, createdAt: new Date().toISOString() },
+      ]),
+    );
+  } catch {
+    throw new Error("storage");
+  }
+}
+
+const SUBMIT_ERRORS = {
+  duplicate: (title) =>
+    `이미 『${title}』 목표가 등록되어 있어요. 책 '수정'을 눌러 다른 책으로 바꾼 뒤 다시 시도해주세요.`,
+  storage: () =>
+    "목표를 저장하지 못했어요. 입력한 내용은 그대로 있으니 잠시 후 다시 시도해주세요.",
+};
+
+async function completeGoal(e) {
   e.preventDefault();
+  if (goalState.submitting) return;
 
   // 확인 단계가 아닐 때 Enter로 제출하면 '다음'처럼 동작
   if (goalState.step !== 4) {
@@ -607,7 +818,26 @@ function completeGoal(e) {
     return;
   }
 
-  if (!validateStep(2) || !validateStep(3)) return;
+  // 수정이 필요한 단계로 이동해 오류 항목을 안내
+  const invalidStep = [2, 3].find((step) => !validateStep(step));
+  if (invalidStep) {
+    showStep(invalidStep);
+    validateStep(invalidStep);
+    return;
+  }
+
+  setSubmitting(true);
+  await wait(SUBMIT_DELAY);
+
+  try {
+    saveGoal(goalState);
+  } catch (error) {
+    setSubmitting(false);
+    goalSubmit.textContent = "다시 시도";
+    showSubmitFeedback(SUBMIT_ERRORS[error.message](goalState.title), "error");
+    goalSubmit.focus();
+    return;
+  }
 
   goalState.completed = true;
   goalSection.classList.add("is-completed");
@@ -620,7 +850,21 @@ function resetGoal() {
   setFieldError(cycleFieldset, document.querySelector("#goal-cycle-error"), "");
   setFieldError(goalAmount, document.querySelector("#goal-amount-error"), "");
   resetBookSearch();
-  goalState = createGoalState();
+  toggleNotifyOptions();
+  updateTitleCounter();
+  goalState = {
+    step: 1,
+    title: "",
+    author: "",
+    cycle: "",
+    amount: "",
+    notify: false,
+    notifyTime: "",
+    notifyMethod: "",
+    pages: 0,
+    completed: false,
+    submitting: false,
+  };
   goalSection.classList.remove("is-completed");
   goToStep(1);
 }
@@ -653,9 +897,16 @@ function handleGoalClick(e) {
 // 값을 고치면 해당 항목의 오류 안내를 바로 지움
 function handleGoalFieldChange(e) {
   const { name } = e.target;
-  if (name === "title" && goalTitle.classList.contains("is-invalid")) validateTitle();
-  if (name === "cycle" && cycleFieldset.classList.contains("is-invalid")) validateCycle();
-  if (name === "amount" && goalAmount.classList.contains("is-invalid")) validateAmount();
+  if (name === "title") updateTitleCounter();
+  if (name === "notify") toggleNotifyOptions();
+  if (name === "notifyTime" && goalNotifyTime.classList.contains("is-invalid"))
+    validateNotifyTime();
+  if (name === "title" && goalTitle.classList.contains("is-invalid"))
+    validateTitle();
+  if (name === "cycle" && cycleFieldset.classList.contains("is-invalid"))
+    validateCycle();
+  if (name === "amount" && goalAmount.classList.contains("is-invalid"))
+    validateAmount();
 }
 
 goalForm.addEventListener("click", handleGoalClick);
@@ -664,3 +915,91 @@ goalForm.addEventListener("input", handleGoalFieldChange);
 goalForm.addEventListener("change", handleGoalFieldChange);
 
 showStep(1);
+
+// ===== 6. 메뉴 이동 · 현재 위치 · 모바일 메뉴 (9주차) =====
+const navToggle = document.querySelector(".nav-toggle");
+const mainMenu = document.querySelector("#main-menu");
+const menuLinks = mainMenu.querySelectorAll("a[href^='#']");
+const menuSections = Array.from(menuLinks, (link) =>
+  document.querySelector(link.getAttribute("href")),
+);
+// 섹션 윗부분이 화면 위에서 이 거리 안으로 들어오면 현재 위치로 봄
+const CURRENT_OFFSET = 120;
+
+function setCurrentMenu(id) {
+  menuLinks.forEach((link) => {
+    const isCurrent = link.getAttribute("href") === `#${id}`;
+    link.classList.toggle("is-current", isCurrent);
+    if (isCurrent) {
+      link.setAttribute("aria-current", "location");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+// 실제 스크롤 위치 기준으로 현재 섹션 계산 (새로고침·뒤로 가기·직접 스크롤 모두 대응)
+function updateCurrentFromScroll() {
+  const atBottom =
+    window.innerHeight + window.scrollY >=
+    document.documentElement.scrollHeight - 2;
+  // 페이지 끝에서는 더 내려갈 수 없어 아래쪽 섹션이 위에 닿지 못함
+  // → 메뉴로 이동한 섹션이 화면에 보이면 그 섹션, 아니면 마지막 섹션
+  const hashSection = menuSections.find(
+    (section) => `#${section.id}` === location.hash,
+  );
+  const isHashVisible =
+    hashSection &&
+    hashSection.getBoundingClientRect().top < window.innerHeight &&
+    hashSection.getBoundingClientRect().bottom > 0;
+  const current = atBottom
+    ? isHashVisible
+      ? hashSection
+      : menuSections[menuSections.length - 1]
+    : menuSections
+        .filter((section) => section.getBoundingClientRect().top <= CURRENT_OFFSET)
+        .pop() || menuSections[0];
+  setCurrentMenu(current.id);
+}
+
+let scrollTicking = false;
+function handleScroll() {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  requestAnimationFrame(() => {
+    updateCurrentFromScroll();
+    scrollTicking = false;
+  });
+}
+
+function handleHashChange() {
+  const id = location.hash.slice(1);
+  if (menuSections.some((section) => section.id === id)) setCurrentMenu(id);
+}
+
+// 메뉴 표시 상태·버튼 문구·aria-expanded를 함께 변경
+function setMenuOpen(isOpen) {
+  mainMenu.classList.toggle("is-open", isOpen);
+  navToggle.setAttribute("aria-expanded", String(isOpen));
+  navToggle.textContent = isOpen ? "메뉴 닫기" : "메뉴 열기";
+}
+
+navToggle.addEventListener("click", () => {
+  setMenuOpen(navToggle.getAttribute("aria-expanded") !== "true");
+});
+
+menuLinks.forEach((link) => {
+  link.addEventListener("click", () => setMenuOpen(false));
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !mainMenu.classList.contains("is-open")) return;
+  setMenuOpen(false);
+  navToggle.focus();
+});
+
+window.addEventListener("scroll", handleScroll, { passive: true });
+window.addEventListener("hashchange", handleHashChange);
+window.addEventListener("load", updateCurrentFromScroll);
+handleHashChange();
+if (!location.hash) setCurrentMenu(menuSections[0].id);

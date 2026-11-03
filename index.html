@@ -18,12 +18,22 @@
     <header>
       <h1>책갈피</h1>
       <p>하루 한 줄, 나만의 독서 기록장</p>
-      <nav>
-        <a href="#intro">소개</a>
-        <a href="#features">주요 기능</a>
-        <a href="#howto">이용 방법</a>
-        <a href="#goal">목표 만들기</a>
-        <a href="#start">시작하기</a>
+      <button
+        type="button"
+        class="nav-toggle"
+        aria-expanded="false"
+        aria-controls="main-menu"
+      >
+        메뉴 열기
+      </button>
+      <nav aria-label="주요 메뉴">
+        <ul id="main-menu" class="main-menu">
+          <li><a href="#intro">서비스 소개</a></li>
+          <li><a href="#features">독서 기록하기</a></li>
+          <li><a href="#howto">이용 방법</a></li>
+          <li><a href="#goal">독서 목표 만들기</a></li>
+          <li><a href="#start">오픈 알림 신청</a></li>
+        </ul>
       </nav>
     </header>
 
@@ -117,9 +127,31 @@
 
             <button type="submit" id="record-button" disabled>기록하기</button>
           </form>
+          <div
+            class="filter-group"
+            role="group"
+            aria-label="읽기 상태로 기록 거르기"
+          >
+            <button type="button" class="filter is-active" data-filter="all" aria-pressed="true">
+              전체
+            </button>
+            <button type="button" class="filter" data-filter="reading" aria-pressed="false">
+              읽는 중
+            </button>
+            <button type="button" class="filter" data-filter="finished" aria-pressed="false">
+              완독
+            </button>
+            <button type="button" class="filter" data-filter="paused" aria-pressed="false">
+              잠시 멈춤
+            </button>
+          </div>
+          <p id="record-count" class="record-count" aria-live="polite"></p>
           <p id="record-empty" class="empty-message">
             아직 남긴 기록이 없어요. 첫 기록을 남겨보세요!
           </p>
+          <button type="button" id="record-show-all" class="btn-secondary" hidden>
+            전체 보기
+          </button>
           <ul id="record-list" class="record-list"></ul>
         </div>
 
@@ -231,8 +263,11 @@
                 name="title"
                 maxlength="30"
                 placeholder="예: 아몬드"
-                aria-describedby="goal-title-error"
+                aria-describedby="goal-title-counter goal-title-error"
               />
+              <p id="goal-title-counter" class="counter" aria-live="polite">
+                0 / 30자 · 책 제목을 입력해주세요
+              </p>
               <p id="goal-title-error" class="field-error"></p>
             </div>
             <div class="field">
@@ -257,8 +292,11 @@
 
           <div class="goal-step" data-step="3" hidden>
             <h3 tabindex="-1">얼마나 자주, 얼마만큼 읽을까요?</h3>
-            <fieldset class="field" aria-describedby="goal-cycle-error">
+            <fieldset class="field" aria-describedby="goal-cycle-hint goal-cycle-error">
               <legend>독서 주기 <strong>(필수)</strong></legend>
+              <p id="goal-cycle-hint" class="field-hint">
+                꾸준히 지킬 수 있는 주기 하나를 골라주세요.
+              </p>
               <div class="choice-group">
                 <label class="choice">
                   <input type="radio" name="cycle" value="daily" />
@@ -277,7 +315,14 @@
             </fieldset>
             <div class="field">
               <label for="goal-amount">하루 목표 분량 <strong>(필수)</strong></label>
-              <select id="goal-amount" name="amount" aria-describedby="goal-amount-error">
+              <p id="goal-amount-hint" class="field-hint">
+                처음에는 부담 없는 분량을 추천해요.
+              </p>
+              <select
+                id="goal-amount"
+                name="amount"
+                aria-describedby="goal-amount-hint goal-amount-error"
+              >
                 <option value="">선택해주세요</option>
                 <option value="10p">10쪽</option>
                 <option value="20p">20쪽</option>
@@ -290,6 +335,35 @@
               <input type="checkbox" id="goal-notify" name="notify" />
               읽을 시간이 되면 알림 받기 (선택)
             </label>
+            <div id="notify-options" class="notify-options" hidden>
+              <div class="field">
+                <label for="goal-notify-time">알림 시간 <strong>(필수)</strong></label>
+                <p id="goal-notify-time-hint" class="field-hint">
+                  알림을 받을 시간을 골라주세요. 예: 오후 9:00
+                </p>
+                <input
+                  type="time"
+                  id="goal-notify-time"
+                  name="notifyTime"
+                  aria-describedby="goal-notify-time-hint goal-notify-time-error"
+                  disabled
+                />
+                <p id="goal-notify-time-error" class="field-error"></p>
+              </div>
+              <fieldset class="field">
+                <legend>알림 방법</legend>
+                <div class="choice-group">
+                  <label class="choice">
+                    <input type="radio" name="notifyMethod" value="push" checked disabled />
+                    <span>앱 푸시</span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="notifyMethod" value="email" disabled />
+                    <span>이메일</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
             <div class="step-actions">
               <button type="button" class="btn-secondary" data-action="prev">
                 이전
@@ -332,11 +406,14 @@
                 </button>
               </div>
             </dl>
+            <p id="goal-submit-feedback" class="form-feedback" aria-live="polite"></p>
             <div class="step-actions">
               <button type="button" class="btn-secondary" data-action="prev">
                 이전
               </button>
-              <button type="submit" class="btn-primary">목표 등록</button>
+              <button type="submit" id="goal-submit" class="btn-primary">
+                목표 등록
+              </button>
             </div>
           </div>
 

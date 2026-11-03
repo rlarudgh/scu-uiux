@@ -28,23 +28,46 @@ header p {
   margin: 0 0 16px;
 }
 
-nav {
+.nav-toggle {
+  display: none;
+}
+
+.main-menu {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-nav a {
+.main-menu a {
+  display: block;
   padding: 6px 14px;
+  border: 1px solid transparent;
   border-radius: 16px;
   color: #2f6b52;
   text-decoration: none;
   transition: background-color 0.2s ease;
 }
 
-nav a:hover {
+.main-menu a:hover {
   background-color: #d7e8de;
+}
+
+/* 현재 위치: 색 + 굵기 + 밑줄로 구분 */
+.main-menu a.is-current {
+  background-color: #2f6b52;
+  border-color: #2f6b52;
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+main section {
+  scroll-margin-top: 16px;
 }
 
 section {
@@ -202,6 +225,10 @@ section p.counter.over {
   font-weight: bold;
 }
 
+section p.counter.ok {
+  color: #2f6b52;
+}
+
 #record-button {
   box-sizing: border-box;
   align-self: flex-start;
@@ -227,6 +254,47 @@ section p.counter.over {
 section p.empty-message {
   color: #777;
   font-size: 0.95rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.filter {
+  padding: 6px 14px;
+  background-color: #ffffff;
+  color: #2f6b52;
+  border: 1px solid #2f6b52;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.filter:hover {
+  background-color: #eef5f1;
+}
+
+.filter.is-active {
+  background-color: #2f6b52;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.filter.is-active::before {
+  content: "✓ ";
+}
+
+section p.record-count {
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+section p.record-count:empty {
+  display: none;
 }
 
 .record-list {
@@ -455,6 +523,31 @@ fieldset.field.is-invalid {
   margin-bottom: 16px;
 }
 
+section p.field-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.notify-options {
+  margin: -4px 0 16px;
+  padding: 12px 16px 0;
+  border-left: 3px solid #d7e3dc;
+}
+
+.choice-group:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.goal-step input[type="time"] {
+  align-self: flex-start;
+  padding: 10px 12px;
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #ffffff;
+}
+
 section p.field-error {
   margin: 0;
   font-size: 0.85rem;
@@ -663,6 +756,12 @@ section p.complete-badge {
   background-color: #245640;
 }
 
+.btn-primary:disabled {
+  background-color: #a9b8b1;
+  border-color: #a9b8b1;
+  cursor: not-allowed;
+}
+
 .btn-secondary {
   background-color: #ffffff;
   color: #2f6b52;
@@ -745,6 +844,10 @@ section p.complete-badge {
   color: #a15c00;
 }
 
+.form-feedback.pending {
+  color: #555;
+}
+
 .form-feedback.success {
   color: #2f6b52;
   font-weight: bold;
@@ -771,9 +874,35 @@ footer {
     font-size: 1.6rem;
   }
 
-  nav {
+  .nav-toggle {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    color: #2f6b52;
+    border: 1px solid #2f6b52;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .nav-toggle[aria-expanded="true"] {
+    background-color: #d7e8de;
+  }
+
+  .main-menu {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    margin-top: 12px;
+  }
+
+  .main-menu:not(.is-open) {
+    display: none;
+  }
+
+  .main-menu a {
+    padding: 10px 14px;
+    border-radius: 6px;
   }
 
   section {
@@ -855,4 +984,8 @@ footer {
   .calendar-day strong {
     font-size: 0.95rem;
   }
+}
+
+#goal-submit-feedback {
+  margin: 0 0 12px;
 }
