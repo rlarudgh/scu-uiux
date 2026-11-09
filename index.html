@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./script.js" defer></script>
-    <title>ui&ux programming</title>
+    <title>책갈피 - 하루 한 줄 독서 기록</title>
   </head>
   <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
     <!--
       사용자: 책을 읽고 기록을 남기고 싶은 20~30대 독서 초보자
       목적: 매일의 독서 기록을 간단히 남기고 습관을 이어가도록 돕는다
@@ -37,7 +38,7 @@
       </nav>
     </header>
 
-    <main>
+    <main id="main" tabindex="-1">
       <section id="intro">
         <h2>서비스 소개</h2>
         <p>
@@ -53,7 +54,7 @@
       </section>
 
       <section id="features">
-        <h2>주요 기능</h2>
+        <h2>독서 기록하기</h2>
         <div class="tab-list" role="tablist" aria-label="책갈피 주요 기능">
           <button
             type="button"
@@ -97,12 +98,13 @@
         >
           <p>오늘 읽은 책과 짧은 감상을 1분 안에 남겨보세요.</p>
           <form id="record-form" class="record-form" novalidate>
-            <label for="book-title">책 제목</label>
+            <label for="book-title">책 제목 <strong>(필수)</strong></label>
             <input
               type="text"
               id="book-title"
               placeholder="예: 데미안"
               maxlength="30"
+              aria-describedby="record-hint"
             />
 
             <label for="read-status">읽기 상태</label>
@@ -117,13 +119,17 @@
               </span>
             </div>
 
-            <label for="memo">한 줄 감상</label>
+            <label for="memo">한 줄 감상 <strong>(필수, 50자 이내)</strong></label>
             <input
               type="text"
               id="memo"
               placeholder="오늘 읽은 부분에서 기억에 남는 한 줄"
+              aria-describedby="memo-counter record-hint"
             />
             <p id="memo-counter" class="counter" aria-live="polite">0 / 50</p>
+            <p id="record-hint" class="field-hint">
+              책 제목과 한 줄 감상을 입력하면 기록하기 버튼을 누를 수 있어요.
+            </p>
 
             <button type="submit" id="record-button" disabled>기록하기</button>
           </form>
@@ -380,30 +386,38 @@
               <div>
                 <dt>책</dt>
                 <dd data-summary="book"></dd>
-                <button type="button" class="btn-link" data-action="edit" data-target="2">
-                  수정
-                </button>
+                <dd>
+                  <button type="button" class="btn-link" data-action="edit" data-target="2">
+                    수정
+                  </button>
+                </dd>
               </div>
               <div>
                 <dt>독서 주기</dt>
                 <dd data-summary="cycle"></dd>
-                <button type="button" class="btn-link" data-action="edit" data-target="3">
-                  수정
-                </button>
+                <dd>
+                  <button type="button" class="btn-link" data-action="edit" data-target="3">
+                    수정
+                  </button>
+                </dd>
               </div>
               <div>
                 <dt>하루 목표</dt>
                 <dd data-summary="amount"></dd>
-                <button type="button" class="btn-link" data-action="edit" data-target="3">
-                  수정
-                </button>
+                <dd>
+                  <button type="button" class="btn-link" data-action="edit" data-target="3">
+                    수정
+                  </button>
+                </dd>
               </div>
               <div>
                 <dt>알림</dt>
                 <dd data-summary="notify"></dd>
-                <button type="button" class="btn-link" data-action="edit" data-target="3">
-                  수정
-                </button>
+                <dd>
+                  <button type="button" class="btn-link" data-action="edit" data-target="3">
+                    수정
+                  </button>
+                </dd>
               </div>
             </dl>
             <p id="goal-submit-feedback" class="form-feedback" aria-live="polite"></p>
@@ -441,16 +455,20 @@
       </section>
 
       <section id="start">
-        <h2>시작하기</h2>
+        <h2>오픈 알림 신청</h2>
         <p>이메일을 남기면 서비스 오픈 소식을 가장 먼저 알려드려요.</p>
         <form novalidate>
           <label for="email">이메일</label>
+          <p id="email-hint" class="field-hint">
+            오픈 소식을 받을 이메일 주소를 입력해주세요. 예: you@example.com
+          </p>
           <input
             type="email"
             id="email"
             name="email"
             placeholder="you@example.com"
             required
+            aria-describedby="email-hint email-feedback"
           />
           <button type="submit">알림 신청</button>
         </form>

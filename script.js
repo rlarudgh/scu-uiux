@@ -14,6 +14,12 @@ function isValidEmail(value) {
 function showFeedback(message, status) {
   feedbackEl.textContent = message;
   feedbackEl.className = `form-feedback ${status}`;
+  // 오류 상태를 색뿐 아니라 aria-invalid로도 알림
+  if (status === "error") {
+    emailInput.setAttribute("aria-invalid", "true");
+  } else {
+    emailInput.removeAttribute("aria-invalid");
+  }
 }
 
 function handleSubmit(e) {
@@ -22,12 +28,17 @@ function handleSubmit(e) {
   const email = emailInput.value.trim();
 
   if (email === "") {
-    showFeedback("이메일을 입력해주세요.", "error");
+    showFeedback("이메일을 입력해주세요. 예: you@example.com", "error");
+    emailInput.focus();
     return;
   }
 
   if (!isValidEmail(email)) {
-    showFeedback("올바른 이메일 형식이 아니에요.", "error");
+    showFeedback(
+      "이메일 형식이 올바르지 않아요. '@'와 도메인을 포함해 입력해주세요. 예: you@example.com",
+      "error",
+    );
+    emailInput.focus();
     return;
   }
 
@@ -46,15 +57,14 @@ function handleSubmit(e) {
 
 emailForm.addEventListener("submit", handleSubmit);
 
+// 버튼은 항상 누를 수 있게 두고(키보드·스크린 리더 사용자도 오류 안내를 받도록) 제출 시 검증
 function handleEmailInput() {
   if (feedbackEl.classList.contains("error")) {
     showFeedback("", "");
   }
-  submitButton.disabled = emailInput.value.trim() === "";
 }
 
 emailInput.addEventListener("input", handleEmailInput);
-handleEmailInput();
 
 // ===== 2. 주요 기능 탭 =====
 const tabs = document.querySelectorAll("[role='tab']");
@@ -70,13 +80,20 @@ function activateTab(selectedTab) {
   });
 }
 
+// ←/→로 이웃 탭, Home/End로 처음·마지막 탭
 function handleTabKeydown(e) {
-  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-
   const list = Array.from(tabs);
-  const step = e.key === "ArrowRight" ? 1 : -1;
-  const next =
-    list[(list.indexOf(e.currentTarget) + step + list.length) % list.length];
+  const current = list.indexOf(e.currentTarget);
+  const targets = {
+    ArrowRight: (current + 1) % list.length,
+    ArrowLeft: (current - 1 + list.length) % list.length,
+    Home: 0,
+    End: list.length - 1,
+  };
+  if (!(e.key in targets)) return;
+
+  e.preventDefault();
+  const next = list[targets[e.key]];
   activateTab(next);
   next.focus();
 }
@@ -244,9 +261,18 @@ function renderCalendar() {
     const key = date.toDateString();
     const day = document.createElement("li");
     day.className = "calendar-day";
-    day.classList.toggle("is-today", key === todayKey);
-    day.classList.toggle("is-recorded", recordedDays.has(key));
-    day.innerHTML = `<span>${dayNames[i]}</span><strong>${date.getDate()}</strong>`;
+    const isToday = key === todayKey;
+    const isRecorded = recordedDays.has(key);
+    day.classList.toggle("is-today", isToday);
+    day.classList.toggle("is-recorded", isRecorded);
+    // 색만으로 구분하지 않도록 ✓ 기호와 스크린 리더용 문구를 함께 표시
+    const notes = [isToday && "오늘", isRecorded ? "기록함" : "기록 없음"]
+      .filter(Boolean)
+      .join(", ");
+    day.innerHTML =
+      `<span>${dayNames[i]}</span><strong>${date.getDate()}</strong>` +
+      `<span class="day-mark" aria-hidden="true">${isRecorded ? "✓" : ""}</span>` +
+      `<span class="visually-hidden">${notes}</span>`;
     return day;
   });
 
