@@ -927,6 +927,128 @@ select:focus-visible,
   min-height: 1.2em;
 }
 
+/* ===== 12주차 재사용 UI 컴포넌트 ===== */
+
+/* 아코디언: .accordion > .accordion-heading > .accordion-trigger + .accordion-panel */
+#howto h3 {
+  margin-top: 24px;
+}
+
+.accordion {
+  border: 1px solid #d7e3dc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.accordion-heading {
+  margin: 0;
+}
+
+.accordion-heading:not(:first-child) {
+  border-top: 1px solid #d7e3dc;
+}
+
+.accordion-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #ffffff;
+  border: none;
+  color: #222;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.accordion-trigger:hover {
+  background-color: #eef5f1;
+}
+
+/* 열린 상태: 배경색 + 초록 왼쪽 선 + "접기 −" 문구로 표시 */
+.accordion-trigger[aria-expanded="true"] {
+  background-color: #eef5f1;
+  color: #245640;
+  box-shadow: inset 4px 0 0 #2f6b52;
+}
+
+.accordion-state {
+  flex-shrink: 0;
+  color: #2f6b52;
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+.accordion-state::after {
+  content: " +";
+  font-weight: bold;
+}
+
+.accordion-trigger[aria-expanded="true"] .accordion-state::after {
+  content: " −";
+}
+
+.accordion-panel {
+  padding: 4px 16px 12px;
+  background-color: #f8fbf9;
+}
+
+.accordion-panel p {
+  margin: 8px 0 0;
+}
+
+/* 모달: <dialog class="modal"> > .modal-content > .modal-title + .modal-actions */
+.modal {
+  width: min(90vw, 420px);
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.modal::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.modal-title {
+  margin: 0 0 8px;
+  padding: 0;
+  border: none;
+  font-size: 1.2rem;
+  color: #245640;
+}
+
+.modal-content p {
+  margin: 0 0 20px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     padding: 16px;

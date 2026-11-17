@@ -66,11 +66,16 @@ function handleEmailInput() {
 
 emailInput.addEventListener("input", handleEmailInput);
 
-// ===== 2. 주요 기능 탭 =====
-const tabs = document.querySelectorAll("[role='tab']");
+// ===== 2. 탭 (재사용형: data-tabs가 붙은 탭 목록마다 따로 동작) =====
+function getTabsOf(tab) {
+  return Array.from(
+    tab.closest("[role='tablist']").querySelectorAll("[role='tab']"),
+  );
+}
 
+// 같은 탭 목록 안에서만 선택 상태와 패널 표시를 바꿈
 function activateTab(selectedTab) {
-  tabs.forEach((tab) => {
+  getTabsOf(selectedTab).forEach((tab) => {
     const isSelected = tab === selectedTab;
     tab.classList.toggle("is-active", isSelected);
     tab.setAttribute("aria-selected", String(isSelected));
@@ -82,8 +87,10 @@ function activateTab(selectedTab) {
 
 // ←/→로 이웃 탭, Home/End로 처음·마지막 탭
 function handleTabKeydown(e) {
-  const list = Array.from(tabs);
-  const current = list.indexOf(e.currentTarget);
+  const tab = e.target.closest("[role='tab']");
+  if (!tab) return;
+  const list = getTabsOf(tab);
+  const current = list.indexOf(tab);
   const targets = {
     ArrowRight: (current + 1) % list.length,
     ArrowLeft: (current - 1 + list.length) % list.length,
@@ -98,10 +105,19 @@ function handleTabKeydown(e) {
   next.focus();
 }
 
-tabs.forEach((tab) => {
-  tab.addEventListener("click", () => activateTab(tab));
-  tab.addEventListener("keydown", handleTabKeydown);
-});
+function handleTabClick(e) {
+  const tab = e.target.closest("[role='tab']");
+  if (tab) activateTab(tab);
+}
+
+// 탭 목록마다 리스너 2개만 등록 (이벤트 위임)
+function initTabs(tablist) {
+  tablist.addEventListener("click", handleTabClick);
+  tablist.addEventListener("keydown", handleTabKeydown);
+}
+
+document.querySelectorAll("[data-tabs]").forEach(initTabs);
+const featureTabs = document.querySelectorAll("#features [role='tab']");
 
 // ===== 3. 한 줄 기록 · 독서 캘린더 · 완독 목록 =====
 const MEMO_MAX = 50;
@@ -896,7 +912,7 @@ function resetGoal() {
 }
 
 function startFirstRecord() {
-  activateTab(tabs[0]);
+  activateTab(featureTabs[0]);
   titleInput.value = goalState.title;
   updateRecordButton();
   document.querySelector("#features").scrollIntoView({ behavior: "smooth" });
@@ -910,7 +926,6 @@ const GOAL_ACTIONS = {
     saveStep(goalState.step);
     goToStep(Number(button.dataset.target));
   },
-  restart: resetGoal,
   record: startFirstRecord,
 };
 
@@ -1029,3 +1044,63 @@ window.addEventListener("hashchange", handleHashChange);
 window.addEventListener("load", updateCurrentFromScroll);
 handleHashChange();
 if (!location.hash) setCurrentMenu(menuSections[0].id);
+
+// ===== 7. 모달 (재사용형: data-modal-open="모달 id" 버튼 + <dialog class="modal">) =====
+// 확인 버튼(value="confirm")으로 닫혔을 때 실행할 동작을 모달 id별로 등록
+const MODAL_CONFIRM_ACTIONS = {
+  "restart-modal": resetGoal,
+};
+let lastModalTrigger = null;
+
+function openModal(id, trigger) {
+  const dialog = document.getElementById(id);
+  lastModalTrigger = trigger;
+  dialog.returnValue = "";
+  dialog.showModal(); // Esc 닫기, 배경 조작 차단, 초점 가두기는 브라우저가 처리
+}
+
+// 취소·Esc·배경 클릭이면 모달을 연 버튼으로 초점을 돌려줌
+function handleModalClose(e) {
+  const dialog = e.currentTarget;
+  const confirmAction = MODAL_CONFIRM_ACTIONS[dialog.id];
+  if (dialog.returnValue === "confirm" && confirmAction) {
+    confirmAction();
+    return;
+  }
+  if (lastModalTrigger) lastModalTrigger.focus();
+}
+
+// 안쪽 내용이 아닌 어두운 배경(dialog 자체)을 클릭하면 닫기
+function handleModalBackdropClick(e) {
+  if (e.target === e.currentTarget) e.currentTarget.close();
+}
+
+document.querySelectorAll("dialog.modal").forEach((dialog) => {
+  dialog.addEventListener("close", handleModalClose);
+  dialog.addEventListener("click", handleModalBackdropClick);
+});
+
+document.addEventListener("click", (e) => {
+  const trigger = e.target.closest("[data-modal-open]");
+  if (trigger) openModal(trigger.dataset.modalOpen, trigger);
+});
+
+// ===== 8. 아코디언 (재사용형: data-accordion 안의 .accordion-trigger) =====
+function setAccordionOpen(trigger, isOpen) {
+  trigger.setAttribute("aria-expanded", String(isOpen));
+  trigger.querySelector(".accordion-state").textContent = isOpen
+    ? "접기"
+    : "펼치기";
+  document.getElementById(trigger.getAttribute("aria-controls")).hidden =
+    !isOpen;
+}
+
+function handleAccordionClick(e) {
+  const trigger = e.target.closest(".accordion-trigger");
+  if (!trigger) return;
+  setAccordionOpen(trigger, trigger.getAttribute("aria-expanded") !== "true");
+}
+
+document.querySelectorAll("[data-accordion]").forEach((accordion) => {
+  accordion.addEventListener("click", handleAccordionClick);
+});
