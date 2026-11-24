@@ -288,6 +288,18 @@
         <p id="goal-status" class="goal-status" aria-live="polite">
           1 / 5 단계 · 시작
         </p>
+        <div class="draft-notice">
+          <p id="draft-status" class="draft-status" role="status" aria-live="polite"></p>
+          <button
+            type="button"
+            id="draft-discard"
+            class="btn-secondary"
+            data-modal-open="restart-modal"
+            hidden
+          >
+            처음부터 입력하기
+          </button>
+        </div>
 
         <form id="goal-form" novalidate>
           <div class="goal-step" data-step="1">

@@ -15,7 +15,7 @@ DEPLOY_BRANCH="main"
 # 설정 파일 없이 실행. HTML·CSS는 W3C 공식 검사기(vnu, Java 필요), JS는 ESLint 규칙을 여기서 직접 지정
 VNU="vnu-jar@26.10.12"
 ESLINT="eslint@10.13.0"
-JS_GLOBALS="window,document,location,history,localStorage,requestAnimationFrame,setTimeout"
+JS_GLOBALS="window,document,location,history,localStorage,sessionStorage,requestAnimationFrame,setTimeout"
 JS_RULES=(
   "no-undef: error"
   "no-unused-vars: [error, {ignoreRestSiblings: true}]"

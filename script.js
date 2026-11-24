@@ -462,6 +462,7 @@ function selectBook(id) {
   bookSearchStatus.classList.remove("is-empty");
   bookSearchStatus.textContent = `『${book.title}』을(를) 골랐어요. '다음'을 눌러 목표를 정해주세요.`;
   renderSelected();
+  saveDraft();
 }
 
 function unselectBook() {
@@ -473,6 +474,7 @@ function unselectBook() {
   bookSearchStatus.textContent =
     "선택을 취소했어요. 다시 고르거나 책 제목을 직접 입력해주세요.";
   renderSelected();
+  saveDraft();
   bookSearchInput.focus();
 }
 
@@ -486,6 +488,7 @@ function clearSearch() {
   bookSearchStatus.classList.remove("is-empty");
   bookSearchEmpty.hidden = true;
   renderSearchResults();
+  saveDraft();
 }
 
 function resetBookSearch() {
@@ -575,6 +578,8 @@ const titleCounter = document.querySelector("#goal-title-counter");
 const goalSubmit = document.querySelector("#goal-submit");
 const goalSubmitFeedback = document.querySelector("#goal-submit-feedback");
 const cycleFieldset = goalForm.querySelector("fieldset");
+const draftStatus = document.querySelector("#draft-status");
+const draftDiscard = document.querySelector("#draft-discard");
 
 let goalState = {
   step: 1,
@@ -614,6 +619,7 @@ function showStep(step) {
 
   if (step === 4 || step === 5) renderSummary();
   if (step !== 4) resetSubmitState();
+  saveDraft();
 }
 
 function focusStepHeading() {
@@ -802,6 +808,7 @@ function setSubmitting(isSubmitting) {
   goalState.submitting = isSubmitting;
   goalSubmit.disabled = isSubmitting;
   goalSubmit.textContent = isSubmitting ? "등록 중…" : "목표 등록";
+  draftDiscard.disabled = isSubmitting; // 저장하는 동안 '처음부터 입력하기' 잠금
   if (isSubmitting) showSubmitFeedback("목표를 저장하고 있어요…", "pending");
 }
 
@@ -881,12 +888,14 @@ async function completeGoal(e) {
     return;
   }
 
+  clearDraft(); // 등록에 성공한 목표는 localStorage 목록에 있으므로 임시값은 지움
   goalState.completed = true;
   goalSection.classList.add("is-completed");
   goToStep(5);
 }
 
 function resetGoal() {
+  clearDraft();
   goalForm.reset();
   setFieldError(goalTitle, document.querySelector("#goal-title-error"), "");
   setFieldError(cycleFieldset, document.querySelector("#goal-cycle-error"), "");
@@ -954,8 +963,151 @@ goalForm.addEventListener("click", handleGoalClick);
 goalForm.addEventListener("submit", completeGoal);
 goalForm.addEventListener("input", handleGoalFieldChange);
 goalForm.addEventListener("change", handleGoalFieldChange);
+goalForm.addEventListener("input", saveDraft);
+goalForm.addEventListener("change", saveDraft);
+
+// ===== 5-1. 작성 중 임시 보관과 새로고침 복구 (13주차) =====
+// 작성 중인 목표는 sessionStorage(같은 탭에서만 유지), 등록한 목표는 localStorage(bookmark-goals)
+const DRAFT_STORAGE_KEY = "bookmark-goal-draft-v1";
+const DRAFT_SAVED_MESSAGE =
+  "작성 중인 내용을 이 탭에 임시 보관했어요. 새로고침해도 이어서 쓸 수 있어요.";
+const DRAFT_FAILED_MESSAGE =
+  "작성 내용을 임시 보관하지 못했어요. 새로고침하면 입력한 내용이 사라질 수 있어요.";
+// 복구가 끝나기 전에는 저장하지 않음 (첫 showStep(1)이 보관값을 지우지 않도록)
+let draftReady = false;
+
+function getDraftValues() {
+  const method = goalForm.querySelector("input[name='notifyMethod']:checked");
+  return {
+    step: goalState.step,
+    title: goalTitle.value,
+    author: goalAuthor.value,
+    searchQuery: bookSearchInput.value,
+    selectedBookId: searchState.selected ? searchState.selected.id : "",
+    cycle: getSelectedCycle(),
+    amount: goalAmount.value,
+    notify: goalNotify.checked,
+    notifyTime: goalNotifyTime.value,
+    notifyMethod: method ? method.value : "push",
+  };
+}
+
+function hasDraftInput(draft) {
+  return Boolean(
+    draft.title.trim() ||
+      draft.searchQuery.trim() ||
+      draft.cycle ||
+      draft.amount ||
+      draft.notify,
+  );
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+  } catch {
+    // 저장소에 접근할 수 없으면 지울 것도 없음
+  }
+  draftStatus.textContent = "";
+  draftDiscard.hidden = true;
+}
+
+function saveDraft() {
+  if (!draftReady) return;
+  const draft = getDraftValues();
+  if (goalState.completed || !hasDraftInput(draft)) {
+    clearDraft();
+    return;
+  }
+
+  try {
+    sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    // 같은 문장을 다시 넣지 않아 스크린 리더가 입력할 때마다 읽지 않게 함
+    const status = draftStatus.textContent;
+    if (status === "" || status === DRAFT_FAILED_MESSAGE) {
+      draftStatus.textContent = DRAFT_SAVED_MESSAGE;
+    }
+  } catch {
+    draftStatus.textContent = DRAFT_FAILED_MESSAGE;
+  }
+  draftDiscard.hidden = false;
+}
+
+function readDraft() {
+  try {
+    const draft = JSON.parse(sessionStorage.getItem(DRAFT_STORAGE_KEY));
+    if (!draft || typeof draft.title !== "string") return null;
+    return draft;
+  } catch {
+    return null;
+  }
+}
+
+function pickKey(value, labels, fallback) {
+  return Object.hasOwn(labels, value) ? value : fallback;
+}
+
+function asText(value, max) {
+  return typeof value === "string" ? value.slice(0, max) : "";
+}
+
+// 보관값을 검사해 입력칸에 채우고, 글자 수·알림 영역·검색 결과·요약까지 맞춘 뒤 작성하던 단계를 엶
+function restoreDraft() {
+  const draft = readDraft();
+  if (!draft) return;
+
+  bookSearchInput.value = asText(draft.searchQuery, 20);
+  if (bookSearchInput.value.trim()) runSearch();
+  if (BOOK_CATALOG.some((book) => book.id === draft.selectedBookId)) {
+    selectBook(draft.selectedBookId);
+  }
+  goalTitle.value = asText(draft.title, TITLE_MAX + 20);
+  goalAuthor.value = asText(draft.author, 20);
+  handleTitleEdit();
+  updateTitleCounter();
+
+  const cycle = pickKey(draft.cycle, CYCLE_LABELS, "");
+  if (cycle) {
+    goalForm.querySelector(`input[name='cycle'][value='${cycle}']`).checked =
+      true;
+  }
+  goalAmount.value = pickKey(draft.amount, AMOUNT_LABELS, "");
+  goalNotify.checked = draft.notify === true;
+  toggleNotifyOptions();
+  goalNotifyTime.value = /^\d{2}:\d{2}$/.test(draft.notifyTime)
+    ? draft.notifyTime
+    : "";
+  const method = pickKey(draft.notifyMethod, NOTIFY_METHOD_LABELS, "push");
+  goalForm.querySelector(
+    `input[name='notifyMethod'][value='${method}']`,
+  ).checked = true;
+
+  saveStep(2);
+  saveStep(3);
+
+  // 앞 단계 필수값이 비어 있으면 그 단계부터 열어 빈 요약이 보이지 않게 함
+  const titleLength = goalState.title.length;
+  const titleOk = titleLength > 0 && titleLength <= TITLE_MAX;
+  const optionsOk =
+    goalState.cycle &&
+    goalState.amount &&
+    (!goalState.notify || goalState.notifyTime);
+  const savedStep =
+    Number.isInteger(draft.step) && draft.step >= 1 && draft.step <= 4
+      ? draft.step
+      : 1;
+  const step = Math.min(savedStep, titleOk ? (optionsOk ? 4 : 3) : 2);
+
+  showStep(step);
+  draftReady = true;
+  saveDraft();
+  draftStatus.textContent = `작성하던 목표를 불러왔어요. ${step}단계(${STEP_NAMES[step - 1]})부터 이어서 작성하세요.`;
+  draftDiscard.hidden = false;
+}
 
 showStep(1);
+restoreDraft();
+draftReady = true;
 
 // ===== 6. 메뉴 이동 · 현재 위치 · 모바일 메뉴 (9주차) =====
 const navToggle = document.querySelector(".nav-toggle");
